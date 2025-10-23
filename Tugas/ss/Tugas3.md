@@ -12,3 +12,4 @@ Tampilan Endpoint presensi/check-out jika belum melakukan check-in:
 
 Tampilan Endpoint Report Daily: 
 ![Tampilan Endpoint Report Daily](SS/reportdaily.png)
+
