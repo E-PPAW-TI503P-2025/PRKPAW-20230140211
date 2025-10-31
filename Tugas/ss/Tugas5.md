@@ -1,4 +1,4 @@
- Tampilan Endpoint Presensi Check-in :
+ Tampilan Endpoint update data presensi:
 ![Tampilan Endpoint Presensi Check-in](SS/UpdatePresensi.png)
 
 Tampilan Endpoint update jika format tanggal yang diisi tidak valid :
