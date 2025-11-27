@@ -10,14 +10,16 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      userId: {
+       userId: {
         type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      nama: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
+        allowNull: false,
+        references: {
+          model: 'Users', // ← relasi ke tabel Users
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },    
       checkIn: {
         allowNull: false,
         type: Sequelize.DATE

@@ -1,23 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode"; // ✅ perbaikan import
+import { jwtDecode } from "jwt-decode";
 
 function Navbar() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const [user, setUser] = useState(null);
 
-  let user = null;
+  useEffect(() => {
+    const token = localStorage.getItem("token");
 
-  // Cegah error jika token invalid / expired
-  try {
-    if (token) {
-      user = jwtDecode(token);
+    if (!token) {
+      navigate("/login");
+      return;
     }
-  } catch (err) {
-    console.error("Token tidak valid:", err);
-    localStorage.removeItem("token");
-    navigate("/login");
-  }
+
+    try {
+      const decoded = jwtDecode(token);
+      setUser(decoded);
+    } catch (err) {
+      console.error("Token tidak valid:", err);
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -29,12 +34,32 @@ function Navbar() {
       <h1 className="font-bold text-lg">Presensi Web</h1>
 
       <div className="flex items-center space-x-6">
-        <span>{user?.nama || "User"}</span>
+        <span>{user?.name || "User"}</span>
 
+        {/* MENU UNTUK MAHASISWA */}
+        {user?.role === "mahasiswa" && (
+          <>
+            <Link to="/mahasiswa/dashboard" className="hover:underline">
+              Dashboard
+            </Link>
+
+            <Link to="/mahasiswa/presensi" className="hover:underline">
+              Presensi
+            </Link>
+          </>
+        )}
+
+        {/* MENU UNTUK ADMIN */}
         {user?.role === "admin" && (
-          <Link to="/reports" className="hover:underline">
-            Laporan Admin
-          </Link>
+          <>
+            <Link to="/admin/dashboard" className="hover:underline">
+              Dashboard
+            </Link>
+
+            <Link to="/admin/laporan-presensi" className="hover:underline">
+              Laporan Presensi
+            </Link>
+          </>
         )}
 
         <button

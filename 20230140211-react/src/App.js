@@ -1,17 +1,20 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
-import Navbar from './components/navbar'; 
+import Navbar from './components/navbar';
+
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
-import DashboardPage from './components/DashboardPage';
-import PresensiPage from './components/presensiPage';
 
+// Sesuaikan dengan nama file EXACT yang kamu pakai
+import MahasiswaDashboard from './components/MahasiswaDashboardPage';
+import AdminDashboard from './components/AdminDashboard';
+
+import LaporanPresensiPage from './components/LaporanPresensiPage';
+import PresensiPage from './components/presensiPage';
 
 function Layout({ children }) {
   const location = useLocation();
-
- 
   const hideNavbar = ["/login", "/register", "/"].includes(location.pathname);
 
   return (
@@ -27,11 +30,19 @@ function App() {
     <Router>
       <Layout>
         <Routes>
+          {/* Public */}
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/presensi" element={<PresensiPage />} />
+
+          {/* Mahasiswa Routes */}
+          <Route path="/mahasiswa/dashboard" element={<MahasiswaDashboard />} />
+          <Route path="/mahasiswa/presensi" element={<PresensiPage />} />
+
+
+          {/* Admin Routes */}
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/laporan-presensi" element={<LaporanPresensiPage />} />
         </Routes>
       </Layout>
     </Router>
