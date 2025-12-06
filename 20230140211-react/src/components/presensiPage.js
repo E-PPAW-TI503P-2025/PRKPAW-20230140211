@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {  useState, useEffect, useRef, useCallback} from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -6,11 +6,20 @@ import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
+import Webcam from "react-webcam";
+
 function PresensiPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [coords, setCoords] = useState(null); // { lat, lng }
   const navigate = useNavigate();
+  const [image, setImage] = useState(null);
+  const webcamRef = useRef(null);
+
+  const capture = useCallback(() => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    setImage(imageSrc);
+  }, [webcamRef]);
 
   // ============================
   // AMBIL LOKASI USER
@@ -56,22 +65,26 @@ function PresensiPage() {
       return;
     }
 
+    if (!image) {
+      setError("Foto wajib ada!");
+      return;
+    }
+
     const endpoint =
       type === "in"
         ? "http://localhost:3001/api/presensi/check-in"
         : "http://localhost:3001/api/presensi/check-out";
 
-    // Body request sesuai modul
-    const body =
-      type === "in"
-        ? {
-            latitude: coords.lat,
-            longitude: coords.lng,
-          }
-        : {};
-
     try {
-      const res = await axios.post(endpoint, body, {
+      const blob = await (await fetch(image)).blob();
+
+      //Buat FormData
+      const formData = new FormData();
+      formData.append("latitude", coords.lat);
+      formData.append("longitude", coords.lng);
+      formData.append("buktiFoto", blob, "selfie.jpg");
+
+      const res = await axios.post(endpoint, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -95,7 +108,6 @@ function PresensiPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md text-center">
-
         {/* ================= PETA LOKASI (MODUL OSM) ================= */}
         {coords && (
           <div className="my-4 border rounded-lg overflow-hidden">
@@ -116,6 +128,32 @@ function PresensiPage() {
         )}
         {/* =========================================================== */}
 
+<div className="my-4 border rounded-lg overflow-hidden bg-black">
+ 	        {image ? (
+ 	          <img src={image} alt="Selfie" className="w-full" />
+ 	        ) : (
+ 	          <Webcam
+ 	            audio={false}
+ 	            ref={webcamRef}
+ 	            screenshotFormat="image/jpeg"
+ 	            className="w-full"
+ 	          />
+ 	        )}
+ 	      </div>
+ 	
+ 	      <div className="mb-4">
+ 	        {!image ? (
+ 	          <button onClick={capture} className="bg-blue-500 text-white px-4 py-2 rounded w-full">
+ 	            Ambil Foto 📸
+ 	          </button>
+ 	        ) : (
+ 	          <button onClick={() => setImage(null)} className="bg-gray-500 text-white px-4 py-2 rounded w-full">
+ 	            Foto Ulang 🔄
+ 	          </button>
+ 	        )}
+ 	      </div>
+
+
         <h2 className="text-3xl font-bold mb-6 text-gray-800">
           Lakukan Presensi
         </h2>
@@ -124,9 +162,7 @@ function PresensiPage() {
           <p className="text-green-600 mb-4 font-semibold">{message}</p>
         )}
 
-        {error && (
-          <p className="text-red-600 mb-4 font-semibold">{error}</p>
-        )}
+        {error && <p className="text-red-600 mb-4 font-semibold">{error}</p>}
 
         <div className="flex space-x-4">
           <button

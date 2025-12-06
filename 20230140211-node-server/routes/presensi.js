@@ -5,7 +5,14 @@ const presensiController = require("../controllers/presensiController");
 const { verifyToken } = require("../middleware/authMiddleware");
 
 // ================= CHECK-IN =================
-router.post("/check-in", verifyToken, presensiController.CheckIn);
+router.post(
+  "/check-in",
+  [
+    verifyToken,
+    presensiController.upload.single("buktiFoto")
+  ],
+  presensiController.CheckIn
+);
 
 // ================= CHECK-OUT =================
 router.post("/check-out", verifyToken, presensiController.CheckOut);

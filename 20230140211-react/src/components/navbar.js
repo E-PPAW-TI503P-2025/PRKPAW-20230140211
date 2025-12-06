@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -18,7 +19,6 @@ function Navbar() {
       const decoded = jwtDecode(token);
       setUser(decoded);
     } catch (err) {
-      console.error("Token tidak valid:", err);
       localStorage.removeItem("token");
       navigate("/login");
     }
@@ -29,36 +29,49 @@ function Navbar() {
     navigate("/login");
   };
 
+  const isMahasiswaDashboard =
+    location.pathname === "/mahasiswa/dashboard";
+
+  const isAdminDashboard =
+    location.pathname === "/admin/dashboard";
+
   return (
     <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
       <h1 className="font-bold text-lg">Presensi Web</h1>
 
       <div className="flex items-center space-x-6">
-        <span>{user?.name || "User"}</span>
+        {/* ✅ LABEL ROLE */}
+        <span className="font-semibold capitalize">
+          {user?.role === "admin" ? "Admin" : "Mahasiswa"}
+        </span>
 
-        {/* MENU UNTUK MAHASISWA */}
+        {/* ===== MAHASISWA ===== */}
         {user?.role === "mahasiswa" && (
           <>
             <Link to="/mahasiswa/dashboard" className="hover:underline">
               Dashboard
             </Link>
 
-            <Link to="/mahasiswa/presensi" className="hover:underline">
-              Presensi
-            </Link>
+            {!isMahasiswaDashboard && (
+              <Link to="/mahasiswa/presensi" className="hover:underline">
+                Presensi
+              </Link>
+            )}
           </>
         )}
 
-        {/* MENU UNTUK ADMIN */}
+        {/* ===== ADMIN ===== */}
         {user?.role === "admin" && (
           <>
             <Link to="/admin/dashboard" className="hover:underline">
               Dashboard
             </Link>
 
-            <Link to="/admin/laporan-presensi" className="hover:underline">
-              Laporan Presensi
-            </Link>
+            {!isAdminDashboard && (
+              <Link to="/admin/laporan-presensi" className="hover:underline">
+                Laporan Presensi
+              </Link>
+            )}
           </>
         )}
 
